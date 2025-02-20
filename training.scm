@@ -83,12 +83,11 @@
 (define (load-next-label)
   (one-hot-encode (read-label labels-port) 10))
 
-
 (define (initialize-layer input-size output-size)
   (define (make-row n)
 	(map (lambda (_) (+ 0 (* (sqrt (/ 2 input-size)))) (random:normal)) ; This is the He Initialization, suggested by ChatGPT.
 		 (iota n)))
-  (map (lambda (_) (make-row (+ 1 input-size))) (iota output-size)))
+  (map (lambda (_) (make-row (+ 1 input-size))) (iota output-size))) ; The + 1 is for the bias. Should add an extra column.
 
 (define (softmax logits)
   (let* ((exps (map exp logits))
@@ -101,13 +100,10 @@
 
 (define (forward-pass layers input activation-function)
   (if (null? layers)
-	input
-	(forward-pass (cdr layers) 
-				  (layer-forward input (car layers)))))
-
-; TODO: Need to apply softmax to the output layer.
-
-
+	(softmax (reverse (cdr (reverse input)))))
+	(append (forward-pass (cdr layers) 
+				  (layer-forward input (car layers))
+				  activation-function) 1))
 
 ; END FORWARD-PASS
 
