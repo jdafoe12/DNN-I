@@ -136,7 +136,47 @@
 					 predicted-pd
 					 actual-pd))))
 
-(define (compute-gradients layers input expected-output) expected-output)
+(define (compute-gradients layers input expected-output activation-function) 
+  (let* ((model-output (training-forward-pass layers input activation-function))
+		 (output-error (compute-output-error (car (reverse model-output)) expected-output activation-function))
+		 (gradients (backpropagate-layers (reverse (layers)) (reverse (remove-last model-output)) output-error activation-function))) ; Do I need to remove last element from layers? idk
+	gradients)) ; I think to fix the error noted below, do not remove-last from model output. We will have zi be one ahead of ai?!!!
+
+(define (compute-output-error layer-output expected-output activation-function)
+  (let ((zL (car layer-output))
+        (aL (cadr layer-output)))
+    (map (lambda (a y z) (* (- a y) (derivative activation-function z)))
+         aL expected-output zL)))
+
+(define (backpropagate-layers layers model-output output-error activation-function)
+  (define (backpropagate layers model-output err)
+    (if (null? model-output)
+        '()
+        (let* ((next-layer-output (car model-output))
+               (next-layer (car layers))
+               (zi (car next-layer-output))
+               (ai (cadr next-layer-output))
+               (delta (compute-delta next-layer err zi activation-function))
+               (gradients (compute-gradients-for-layer next-layer-output delta)))
+          (cons gradients (backpropagate (cdr layers) (cdr model-output) delta)))))
+  (backpropagate layers model-output output-error))
+
+(define (compute-delta layer err zi activation-function) ; Im not sure if this is using the previous activations like it should.
+  (map (lambda (e z)
+         (* (matrix-*-vector (transpose (layer-weights layer)) e)
+              (derivative activation-function z)))
+       err zi))
+
+(define (compute-gradients-for-layer layer-output delta)
+  (let ((activations (cadr layer-output)))
+    (let ((grad-W (outer-product delta activations)))
+	  grad-W)))
+
+(define (derivative activation-function z)
+  (cond ((eq? activation-function 'sigmoid) (* (sigmoid z) (- 1 (sigmoid z))))
+        ((eq? activation-function 'ReLU) (if (> z 0) 1 0))))
+
+
 
 
 ; THE BELOW IS GENERATE BY CHATGPT. I shoudl work to understand this. The math is complex but understandable.
