@@ -57,7 +57,14 @@
     (map (lambda (x) 
            (matrix-*-vector cols x)) 
          m)))
-; End matrix multiply
+
+
+(define (outer-product delta activations)
+  (accumulate 
+    (lambda (d)
+      (map (lambda (a) (* d a)) activations))  
+	'() 
+    delta))  ; End matrix multiply
 
 (define (ReLU x)
   (if (< x 0) 0 x))
@@ -139,7 +146,7 @@
 (define (compute-gradients layers input expected-output activation-function) 
   (let* ((model-output (training-forward-pass layers input activation-function))
 		 (output-error (compute-output-error (car (reverse model-output)) expected-output activation-function))
-		 (gradients (backpropagate-layers (reverse (layers)) (reverse (remove-last model-output)) output-error activation-function))) ; Do I need to remove last element from layers? idk
+		 (gradients (backpropagate-layers (reverse layers) (reverse (remove-last model-output)) output-error activation-function))) ; Do I need to remove last element from layers? idk
 	gradients)) ; I think to fix the error noted below, do not remove-last from model output. We will have zi be one ahead of ai?!!!
 
 (define (compute-output-error layer-output expected-output activation-function)
@@ -153,24 +160,23 @@
     (if (null? model-output)
         '()
         (let* ((next-layer-output (car model-output))
+			   (prev-layer-output (cadr model-output))
                (next-layer (car layers))
                (zi (car next-layer-output))
-               (ai (cadr next-layer-output))
+               (ai (cadr prev-layer-output))
                (delta (compute-delta next-layer err zi activation-function))
-               (gradients (compute-gradients-for-layer next-layer-output delta)))
+               (gradients (compute-gradients-for-layer ai delta)))
           (cons gradients (backpropagate (cdr layers) (cdr model-output) delta)))))
   (backpropagate layers model-output output-error))
 
-(define (compute-delta layer err zi activation-function) ; Im not sure if this is using the previous activations like it should.
+(define (compute-delta layer err zi activation-function) 
   (map (lambda (e z)
          (* (matrix-*-vector (transpose (layer-weights layer)) e)
               (derivative activation-function z)))
        err zi))
 
-(define (compute-gradients-for-layer layer-output delta)
-  (let ((activations (cadr layer-output)))
-    (let ((grad-W (outer-product delta activations)))
-	  grad-W)))
+(define (compute-gradients-for-layer activations delta)
+  (outer-product delta activations))
 
 (define (derivative activation-function z)
   (cond ((eq? activation-function 'sigmoid) (* (sigmoid z) (- 1 (sigmoid z))))
