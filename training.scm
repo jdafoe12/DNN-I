@@ -11,22 +11,22 @@
         (b4 (read-u8 port)))
     (+ (ash b1 24) (ash b2 16) (ash b3 8) b4)))
 
-(define images-port (open-input-file "/home/jdafoe/MNIST/train-images-idx3-ubyte" #:binary #t))
-(define labels-port (open-input-file "/home/jdafoe/MNIST/train-labels-idx1-ubyte" #:binary #t))
+;(define images-port (open-input-file "/home/jdafoe/MNIST/train-images-idx3-ubyte" #:binary #t))
+;(define labels-port (open-input-file "/home/jdafoe/MNIST/train-labels-idx1-ubyte" #:binary #t))
 
-(define images-magic (read-u32 images-port))
-(define num-images (read-u32 images-port))
-(define num-rows (read-u32 images-port))
-(define num-cols (read-u32 images-port))
+;(define images-magic (read-u32 images-port))
+;(define num-images (read-u32 images-port))
+;(define num-rows (read-u32 images-port))
+;(define num-cols (read-u32 images-port))
 
-(define labels-magic (read-u32 labels-port))
-(define num-labels (read-u32 labels-port))
+;(define labels-magic (read-u32 labels-port))
+;(define num-labels (read-u32 labels-port))
 
-(display "Image magic: ") (display images-magic) (newline)
-(display "Labels magic: ") (display labels-magic) (newline)
-(display "Images: ") (display num-images) (newline)
-(display "Rows: ") (display num-rows) (newline)
-(display "Cols: ") (display num-cols) (newline)
+;(display "Image magic: ") (display images-magic) (newline)
+;(display "Labels magic: ") (display labels-magic) (newline)
+;(display "Images: ") (display num-images) (newline)
+;(display "Rows: ") (display num-rows) (newline)
+;(display "Cols: ") (display num-cols) (newline)
 
 ;TODO: make sure biases work??
 
@@ -95,15 +95,30 @@
     (map (lambda (x) (/ x sum)) exps)))
 
 ; FORWARD PASS
-(define (layer-forward input layer activation-function)
-  (activation-function (matrix-*-vector layer input)))
+(define (training-layer-forward input layer activation-function)
+  (let ((zl (matrix-*-vector layer (cadr (car (reverse input))))))
+	(append input (list (list (append zl '(1)) (append (map activation-function zl) '(1)))))))
 
-(define (forward-pass layers input activation-function)
+; For the training forward-pass, we need to keep z^l for each layer.
+(define (remove-last l)
+  (reverse (cdr (reverse l))))
+
+(define (identity x) x)
+(define layer1 '((1 0)
+                 (0 1)))
+(define layer2 '((2 0)
+				 (0 2)))
+(define layers (list layer1 layer2))
+(define input '((0 (1 2))))
+
+(define (training-forward-pass layers input activation-function) ; AGHH this still needs work. it is complicated.
   (if (null? layers)
-	(softmax (reverse (cdr (reverse input)))))
-	(append (forward-pass (cdr layers) 
-				  (layer-forward input (car layers))
-				  activation-function) 1))
+	(append (remove-last input) (append (list (list (car (car (reverse input))) (softmax (remove-last (car (car (reverse input))))))))) ; is the remove necessary? i think not. 1 is not added to zl.
+	(training-forward-pass (cdr layers) 
+				  (training-layer-forward input (car layers) activation-function)
+				  activation-function)))
+
+(display (training-forward-pass layers input identity))
 
 ; END FORWARD-PASS
 
@@ -111,7 +126,7 @@
 
 (define (mean-squared-error predicted-pd actual-pd n) 
   (/ n (apply + (map (lambda (predicted actual)
-					   (expt (- pred actual) 2)) 
+					   (expt (- predicted actual) 2)) 
 					 predicted-pd 
 					 actual-pd))))
 
@@ -121,66 +136,69 @@
 					 predicted-pd
 					 actual-pd))))
 
+(define (compute-gradients layers input expected-output) expected-output)
+
+
 ; THE BELOW IS GENERATE BY CHATGPT. I shoudl work to understand this. The math is complex but understandable.
 ; Note there is no explicit bias so this maybe should be different.
-(define (compute-gradients layers input expected-output)
-  (define (layer-backprop input layer output expected-output)
-    (let* ((delta (sub expected-output output))  ; for MSE loss
-           (grad-W (map (lambda (x) (* delta x)) (transpose input)))  ; gradient of weights
-           (grad-b delta))  ; gradient of bias
-      (list grad-W grad-b)))
+;(define (compute-gradients layers input expected-output)
+;  (define (layer-backprop input layer output expected-output)
+;    (let* ((delta (sub expected-output output))  ; for MSE loss
+;           (grad-W (map (lambda (x) (* delta x)) (transpose input)))  ; gradient of weights
+;           (grad-b delta))  ; gradient of bias
+;      (list grad-W grad-b)))
+;
+;  (define (backprop-layers layers input expected-output)
+;    (if (null? layers)
+;        '()
+;        (let ((layer (car layers))
+;              (rest (cdr layers)))
+;          (let* ((output (layer-forward input layer ReLU))
+;                 (gradients (layer-backprop input layer output expected-output)))
+;            (cons gradients (backprop-layers rest output expected-output))))))
+;
+;  (backprop-layers layers input expected-output))
+;
+;
+;(define (update-weights weights gradients learning-rate)
+;  (map (lambda (w g) (map (lambda (wi gi) (- wi (* learning-rate gi))) w g)) weights gradients))
+;
+;(define (train-step layers input expected-output learning-rate)
+;  (let* ((output (forward-pass layers input ReLU))
+;         (loss (cross-entropy-loss output expected-output 1))  ; single sample
+;         (gradients (compute-gradients layers input expected-output)))
+;    (define new-weights (update-weights layers gradients learning-rate))
+;    new-weights))
+;
+;
+;(define (train-epoch layers num-steps learning-rate)
+;  (define (train-step-loop remaining-steps)
+;    (if (= remaining-steps 0)
+;        '()  ; End of training step loop
+;        (let* ((input (load-next-image))   ; Load one training image
+;               (expected-output (load-next-label)) ; Load one-hot encoded label
+;               (new-weights (train-step layers input expected-output learning-rate)))  ; Train on this sample
+;          (train-step-loop (- remaining-steps 1))))) ; Recur for the next step
+;  
+;  (train-step-loop num-steps))
+;
+;
+;(define (train-mnist layers epochs num-steps learning-rate)
+;  (define (train-loop epoch)
+;    (if (= epoch epochs)
+;        '()  ; End of training loop
+;        (begin
+;          (display "Training epoch: ") (display epoch) (newline)
+;          (train-epoch layers num-steps learning-rate)
+;          (train-loop (+ epoch 1)))))
+;
+;  (train-loop 0))  ; Start training from epoch 0
+;
+;
+;(define layers (list (initialize-layer 784 128) ; Example layers
+;                     (initialize-layer 128 64)
+;                     (initialize-layer 64 10)))
+;(train-mnist layers 10 1000 0.01)  ; Train for 10 epochs, 1000 steps per epoch, learning rate 0.01
+;
+;
 
-  (define (backprop-layers layers input expected-output)
-    (if (null? layers)
-        '()
-        (let ((layer (car layers))
-              (rest (cdr layers)))
-          (let* ((output (layer-forward input layer ReLU))
-                 (gradients (layer-backprop input layer output expected-output)))
-            (cons gradients (backprop-layers rest output expected-output))))))
-
-  (backprop-layers layers input expected-output))
-
-
-(define (update-weights weights gradients learning-rate)
-  (map (lambda (w g) (map (lambda (wi gi) (- wi (* learning-rate gi))) w g)) weights gradients))
-
-(define (train-step layers input expected-output learning-rate)
-  (let* ((output (forward-pass layers input ReLU))
-         (loss (cross-entropy-loss output expected-output 1))  ; single sample
-         (gradients (compute-gradients layers input expected-output)))
-    (define new-weights (update-weights layers gradients learning-rate))
-    new-weights))
-
-
-(define (train-epoch layers num-steps learning-rate)
-  (define (train-step-loop remaining-steps)
-    (if (= remaining-steps 0)
-        '()  ; End of training step loop
-        (let* ((input (load-next-image))   ; Load one training image
-               (expected-output (load-next-label)) ; Load one-hot encoded label
-               (new-weights (train-step layers input expected-output learning-rate)))  ; Train on this sample
-          (train-step-loop (- remaining-steps 1))))) ; Recur for the next step
-  
-  (train-step-loop num-steps))
-
-
-(define (train-mnist layers epochs num-steps learning-rate)
-  (define (train-loop epoch)
-    (if (= epoch epochs)
-        '()  ; End of training loop
-        (begin
-          (display "Training epoch: ") (display epoch) (newline)
-          (train-epoch layers num-steps learning-rate)
-          (train-loop (+ epoch 1)))))
-
-  (train-loop 0))  ; Start training from epoch 0
-
-
-(define layers (list (initialize-layer 784 128) ; Example layers
-                     (initialize-layer 128 64)
-                     (initialize-layer 64 10)))
-(train-mnist layers 10 1000 0.01)  ; Train for 10 epochs, 1000 steps per epoch, learning rate 0.01
-
-
-; END CHATGPT
