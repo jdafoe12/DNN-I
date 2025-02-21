@@ -117,6 +117,7 @@
 				 (0 2)))
 (define layers (list layer1 layer2))
 (define input '((0 (1 2))))
+(define expected-output '(1 0))
 
 (define (training-forward-pass layers input activation-function) ; AGHH this still needs work. it is complicated.
   (if (null? layers)
@@ -149,11 +150,18 @@
 		 (gradients (backpropagate-layers (reverse layers) (reverse (remove-last model-output)) output-error activation-function))) ; Do I need to remove last element from layers? idk
 	gradients)) ; I think to fix the error noted below, do not remove-last from model output. We will have zi be one ahead of ai?!!!
 
+;(define (compute-output-error layer-output expected-output activation-function)
+;  (let ((zL (car layer-output))
+;        (aL (cadr layer-output)))
+;    (map (lambda (a y z) (* (- a y) (derivative activation-function z)))
+;         aL expected-output zL)))
 (define (compute-output-error layer-output expected-output activation-function)
-  (let ((zL (car layer-output))
-        (aL (cadr layer-output)))
-    (map (lambda (a y z) (* (- a y) (derivative activation-function z)))
-         aL expected-output zL)))
+  (let ((zL (car layer-output))  ; zL should be a list
+        (aL (cadr layer-output))) ; aL should also be a list
+	(map (lambda (a y z) (* (- a y) (ReLU-derivative z)))
+		 aL expected-output zL)))
+
+
 
 (define (backpropagate-layers layers model-output output-error activation-function)
   (define (backpropagate layers model-output err)
@@ -171,18 +179,22 @@
 
 (define (compute-delta layer err zi activation-function) 
   (map (lambda (e z)
-         (* (matrix-*-vector (transpose (layer-weights layer)) e)
+         (* (matrix-*-vector (transpose layer) e)
               (derivative activation-function z)))
        err zi))
 
 (define (compute-gradients-for-layer activations delta)
   (outer-product delta activations))
 
-(define (derivative activation-function z)
-  (cond ((eq? activation-function 'sigmoid) (* (sigmoid z) (- 1 (sigmoid z))))
-        ((eq? activation-function 'ReLU) (if (> z 0) 1 0))))
+(define (ReLU-derivative z)
+  (if (> z 0) 1 0))
+(newline)
 
 
+(display layers) (newline)
+(display input) (newline)
+(display expected-output) (newline)
+(display (compute-gradients layers input expected-output ReLU))
 
 
 ; THE BELOW IS GENERATE BY CHATGPT. I shoudl work to understand this. The math is complex but understandable.
