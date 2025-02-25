@@ -36,12 +36,16 @@
 		 (hidden-layer-gradients (backpropagate-layers (reverse layers) (reverse (remove-last model-output)) output-error activation-function)))
 	(reverse (append (list output-layer-gradients) hidden-layer-gradients))))
 
-(define (compute-output-error layer-output expected-output activation-function)
-  (let* ((zL (car layer-output))
-        (aL (cadr layer-output))
-        (jacobian (softmax-derivative zL)) 
-        (error (map - aL expected-output)))
-        (matrix-*-vector (transpose jacobian) error)))
+;(define (compute-output-error layer-output expected-output activation-function)
+;  (let* ((zL (car layer-output))
+;        (aL (cadr layer-output))
+;        (jacobian (softmax-derivative zL)) 
+;        (error (map - aL expected-output)))
+;        (matrix-*-vector (transpose jacobian) error)))
+
+(define (compute-output-error layer-output expected-output activation-function) ; Now use cross-entropy?
+  (let* ((aL (cadr layer-output)))
+		 (map - aL expected-output)))
 
 (define (ReLU-derivative z)
   (if (> z 0) 1 0))
