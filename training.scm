@@ -112,14 +112,14 @@
 
 (define (train-epoch layers num-steps learning-rate)
   (let ((permuted-mnist-training-data (get-permuted-mnist-data training-phase)))
-  (define (train-step-iter curr-layers remaining-steps)
+  (define (train-step-iter curr-layers remaining-steps data)
     (if (= remaining-steps 0)
         curr-layers
-		(let* ((input (list (list 0 (car (car permuted-mnist-training-data))))) 
-               (expected-output (cadr (car permuted-mnist-training-data)))
+		(let* ((input (list (list 0 (car (car data))))) 
+               (expected-output (cadr (car data)))
 			   (new-weights (train-step curr-layers input expected-output learning-rate)))
-		  (train-step-iter new-weights (- remaining-steps 1)))))   
-  (train-step-iter layers num-steps)))
+		  (train-step-iter new-weights (- remaining-steps 1) (cdr data)))))   
+  (train-step-iter layers num-steps permuted-mnist-training-data)))
 
 (define (train-step layers input expected-output learning-rate)
   (update-weights layers (compute-gradients layers input expected-output ReLU) learning-rate))
@@ -137,5 +137,5 @@
 					 (initialize-layer 32 32)
 					 (initialize-layer 32 10)))
 
-(save-model (train-mnist layers 3 60000 0.009) "trained-model")
+(save-model (train-mnist layers 2 60000 0.009) "trained-model")
 ;; DONE SPECIFIC TRAINING.

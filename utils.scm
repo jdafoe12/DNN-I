@@ -58,10 +58,14 @@
 	  (error "Image size does not match the expected value for the MNIST dataset (28x28)"))
 	 (else #t)))
 
+;(define (get-permuted-mnist-data phase)
+;  (permute-list (get-all-mnist-data phase)))
+
+
 (define (get-permuted-mnist-data phase)
   (permute-list (get-all-mnist-data phase)))
 
-(define (get-all-mnist-data phase)
+  (define (get-all-mnist-data phase)
   (load-mnist phase)
   (define (get-all-mnist-data-iter i data)
     (if (= i num-images)
