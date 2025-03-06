@@ -7,8 +7,7 @@
 (use-modules (scheme base))
 (load "utils.scm")
 
-(load-mnist training-phase)
-(newline) (display "MNIST training set loaded. The training set contains 60,000 labeled handwritten digits, in the form of 28x28 grayscale images.") (newline)
+
 
 ; TRAINING FORWARD PASS.
 (define (training-layer-forward input layer activation-function)
@@ -112,14 +111,15 @@
   (train-loop 0 layers))
 
 (define (train-epoch layers num-steps learning-rate)
+  (let ((permuted-mnist-training-data (get-permuted-mnist-data training-phase)))
   (define (train-step-iter curr-layers remaining-steps)
     (if (= remaining-steps 0)
         curr-layers
-		(let* ((input (list (list 0 (load-next-image)))) 
-               (expected-output (load-next-label))
+		(let* ((input (list (list 0 (car (car permuted-mnist-training-data))))) 
+               (expected-output (cadr (car permuted-mnist-training-data)))
 			   (new-weights (train-step curr-layers input expected-output learning-rate)))
 		  (train-step-iter new-weights (- remaining-steps 1)))))   
-  (train-step-iter layers num-steps))
+  (train-step-iter layers num-steps)))
 
 (define (train-step layers input expected-output learning-rate)
   (update-weights layers (compute-gradients layers input expected-output ReLU) learning-rate))
@@ -137,5 +137,5 @@
 					 (initialize-layer 32 32)
 					 (initialize-layer 32 10)))
 
-(save-model (train-mnist layers 6 10000 0.01) "trained-model")
+(save-model (train-mnist layers 3 60000 0.009) "trained-model")
 ;; DONE SPECIFIC TRAINING.

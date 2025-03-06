@@ -28,9 +28,9 @@
 
 (define (load-mnist phase)
   (set! images-port
-        (open-input-file (if (= phase 0) "train-images-idx3-ubyte" "t10k-images-idx3-ubyte") #:binary #t))
+        (open-input-file (if (= phase training-phase) "train-images-idx3-ubyte" "t10k-images-idx3-ubyte") #:binary #t))
   (set! labels-port
-        (open-input-file (if (= phase 0) "train-labels-idx1-ubyte" "t10k-labels-idx1-ubyte") #:binary #t))
+        (open-input-file (if (= phase training-phase) "train-labels-idx1-ubyte" "t10k-labels-idx1-ubyte") #:binary #t))
   (set! images-magic (read-u32 images-port))
   (set! num-images (read-u32 images-port))
   (set! num-rows (read-u32 images-port))
@@ -44,7 +44,7 @@
 		 (error "Magic number for images does not match the expected value (2051)"))
 		((not (= labels-magic 2049))
 		 (error "Magic number for labels does not match the expected value (2049)"))
-		((not (= num-images (if (= phase 0) 60000 10000)))
+		((not (= num-images (if (= phase training-phase) 60000 10000)))
 		 (error (string-append 
 			  "Number of images does not match the expected value for the MNIST " 
 			  (if (= phase training-phase) "training" "testing") " set (" 
@@ -57,6 +57,48 @@
 	 ((and (not (= num-rows 28)) (not (= num-cols 28)))
 	  (error "Image size does not match the expected value for the MNIST dataset (28x28)"))
 	 (else #t)))
+
+(define (get-permuted-mnist-data phase)
+  (permute-list (get-all-mnist-data phase)))
+
+(define (get-all-mnist-data phase)
+  (load-mnist phase)
+  (define (get-all-mnist-data-iter i data)
+    (if (= i num-images)
+        data
+        (get-all-mnist-data-iter (+ i 1) (cons (list (load-next-image) (load-next-label)) data))))
+  (let ((result (get-all-mnist-data-iter 0 '())))
+	(close-mnist)
+	result))
+
+(define (remove-nth lst n)
+  (if (= n 0)
+	(cdr lst)
+	(cons (car lst) (remove-nth (cdr lst) (- n 1)))))
+
+(define (permute-list lst)
+  (let* ((len (length lst))
+		(strikes (fisher-yates-shuffle len))) 
+	(define (permute-list-iter new-lst remaining-strikes n)
+	  (if (= n 0) 
+		new-lst
+		(permute-list-iter (append new-lst (list (list-ref lst (car remaining-strikes)))) (cdr remaining-strikes) (- n 1))))
+	(permute-list-iter '() strikes len)))
+
+(define (fisher-yates-shuffle n)
+  (define (fisher-yates-shuffle-iter original strikes)
+    (if (= (length strikes) n)
+	  strikes
+        (let* ((k (random (length original))) 
+			   (selected (list-ref original k))
+			   (remaining (remove-nth original k)))
+		  (fisher-yates-shuffle-iter remaining
+									 (append strikes (list selected))))))
+  (fisher-yates-shuffle-iter (iota n) '()))
+
+(define (close-mnist)
+  (close-input-port images-port)
+  (close-input-port labels-port))
 
 (define (read-image port)
   (get-bytevector-n port (* num-rows num-cols))) ; 28x28 = 784 bytes
@@ -154,3 +196,5 @@
   (with-input-from-file filename
     (lambda ()
       (read))))
+
+
