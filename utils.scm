@@ -26,6 +26,19 @@
 (define labels-magic #f)
 (define num-labels #f)
 
+(define (get-permuted-mnist-data phase)
+  (permute-list (get-all-mnist-data phase)))
+
+(define (get-all-mnist-data phase)
+  (load-mnist phase)
+  (define (get-all-mnist-data-iter i data)
+    (if (= i num-images)
+        data
+        (get-all-mnist-data-iter (+ i 1) (cons (list (load-next-image) (load-next-label)) data))))
+  (let ((result (get-all-mnist-data-iter 0 '())))
+	(close-mnist)
+	result))
+
 (define (load-mnist phase)
   (set! images-port
         (open-input-file (if (= phase training-phase) "train-images-idx3-ubyte" "t10k-images-idx3-ubyte") #:binary #t))
@@ -58,23 +71,33 @@
 	  (error "Image size does not match the expected value for the MNIST dataset (28x28)"))
 	 (else #t)))
 
-;(define (get-permuted-mnist-data phase)
-;  (permute-list (get-all-mnist-data phase)))
+(define (load-next-image) 
+  (normalize-image (read-image images-port)))
 
+(define (load-next-label)
+  (one-hot-encode (read-label labels-port)))
 
-(define (get-permuted-mnist-data phase)
-  (permute-list (get-all-mnist-data phase)))
+(define (read-image port)
+  (get-bytevector-n port (* num-rows num-cols))) ; 28x28 = 784 bytes
 
-  (define (get-all-mnist-data phase)
-  (load-mnist phase)
-  (define (get-all-mnist-data-iter i data)
-    (if (= i num-images)
-        data
-        (get-all-mnist-data-iter (+ i 1) (cons (list (load-next-image) (load-next-label)) data))))
-  (let ((result (get-all-mnist-data-iter 0 '())))
-	(close-mnist)
-	result))
+(define (read-label port)
+  (read-u8 port))
 
+(define (normalize-image image-vector)
+  (map (lambda (pixel) (/ pixel 255.0)) (u8vector->list image-vector)))
+
+(define (one-hot-encode digit)
+  (define (make-zero-list n) (make-list n 0))
+  (let ((encoded (make-zero-list 10))) 
+	(list-set! encoded digit 1) 
+	encoded))
+
+(define (close-mnist)
+  (close-input-port images-port)
+  (close-input-port labels-port))
+;; DONE LOAD MNIST DATASET.
+
+;; PERMUTATION UTILS
 (define (remove-nth lst n)
   (if (= n 0)
 	(cdr lst)
@@ -99,34 +122,10 @@
 		  (fisher-yates-shuffle-iter remaining
 									 (append strikes (list selected))))))
   (fisher-yates-shuffle-iter (iota n) '()))
+;; END PERMUTATION UTILS
 
-(define (close-mnist)
-  (close-input-port images-port)
-  (close-input-port labels-port))
-
-(define (read-image port)
-  (get-bytevector-n port (* num-rows num-cols))) ; 28x28 = 784 bytes
-
-(define (read-label port)
-  (read-u8 port))
-
-(define (normalize-image image-vector)
-  (map (lambda (pixel) (/ pixel 255.0)) (u8vector->list image-vector)))
-
-(define (one-hot-encode digit)
-  (define (make-zero-list n) (make-list n 0))
-  (let ((encoded (make-zero-list 10))) 
-	(list-set! encoded digit 1) 
-	encoded))
-
-(define (load-next-image) 
-  (normalize-image (read-image images-port)))
-
-(define (load-next-label)
-  (one-hot-encode (read-label labels-port)))
-;; DONE LOAD MNIST DATASET.
-
-;; MATRIX / VECTOR MANIPULATION. Most of the following matrix / vector manipulation code is from my solution to SICP Exercise 2.37.
+;; MATRIX / VECTOR MANIPULATION. 
+;; Most of the following matrix / vector manipulation code is from my solution to SICP Exercise 2.37.
 (define (accumulate op initial sequence)
   (if (null? sequence)
 	initial
@@ -138,7 +137,6 @@
   '()
   (cons (accumulate op init (map car seqs))
         (accumulate-n op init (map cdr seqs)))))
-
 
 (define (dot-product v w)
   (let ((products (map * v w)))
@@ -200,5 +198,3 @@
   (with-input-from-file filename
     (lambda ()
       (read))))
-
-

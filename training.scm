@@ -7,8 +7,6 @@
 (use-modules (scheme base))
 (load "utils.scm")
 
-
-
 ; TRAINING FORWARD PASS.
 (define (training-layer-forward input layer activation-function)
 (let* ((weights (car layer))
