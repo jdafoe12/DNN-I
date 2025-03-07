@@ -35,6 +35,7 @@
 		 (hidden-layer-gradients (backpropagate-layers (reverse layers) (reverse (remove-last model-output)) output-error activation-function)))
 	(reverse (append (list output-layer-gradients) hidden-layer-gradients))))
 
+;; For mean squared error loss.
 ;(define (compute-output-error layer-output expected-output activation-function)
 ;  (let* ((zL (car layer-output))
 ;        (aL (cadr layer-output))
@@ -42,9 +43,10 @@
 ;        (error (map - aL expected-output)))
 ;        (matrix-*-vector (transpose jacobian) error)))
 
-(define (compute-output-error layer-output expected-output activation-function) ; Now use cross-entropy?
+;; For cross-entropy loss.
+(define (compute-output-error layer-output expected-output activation-function) 
   (let* ((aL (cadr layer-output)))
-		 (map - aL expected-output)))
+	(map - aL expected-output)))
 
 (define (ReLU-derivative z)
   (if (> z 0) 1 0))
@@ -137,5 +139,7 @@
 					 (initialize-layer 32 32)
 					 (initialize-layer 32 10)))
 
-(save-model (train-mnist layers 2 60000 0.009) "trained-model")
+(save-model (train-mnist layers 4 60000 0.009) "trained-model")
+
+(save-model (train-mnist layers 24 10000 0.009) "trained-model1")
 ;; DONE SPECIFIC TRAINING.
