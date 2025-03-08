@@ -14,7 +14,7 @@ In designing this code, I focused on enabling rapid experimentation with differe
 
 #### The Model
 This is a standard fully connected deep neural network (DNN), which can be customized to have $L$ layers. The entire model is initialized with random parameters (weights and biases) as follows:
-```scheme
+```math
 (define layers (list (initialize-layer 784 $n_1$)
 					 (initialize-layer $n_1$ $n_2$)
                      $\vdots$
