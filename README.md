@@ -2,7 +2,7 @@
 
 ### About
 
-DNN-I was developed both for learning and teaching purposes. Most importantly, my aim was to build a *concrete* understanding of how deep neural networks are trained and how inference works. To achieve this, I implemented everything from scratch, using no special libraries. This gave me much freedom in language choice. I chose Guile Scheme for a couple of reasons:
+DNN-I was developed both for learning and teaching purposes. Most importantly, my aim was to build a *concrete* understanding of how deep neural networks (DNNs) are trained and how inference works. To achieve this, I implemented everything from scratch, using no special libraries. This gave me much freedom in language choice. I chose Guile Scheme for a couple of reasons:
 1. I thought it would be a good opportunity to be my first project written in Guile Scheme. I am (slowly) working my way through *Structure and Interpretation of Computer Programs (SICP)* and wanted to apply some of the learned principles.
 2. Given the history of lisp as a language for artificial intelligence applications, I thought it was a rather natural choice.
 
