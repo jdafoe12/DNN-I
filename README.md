@@ -22,7 +22,7 @@ This is a standard fully connected deep neural network (DNN), which can be custo
 ```
 where $n_i$ is the number of perceptrons (aka neurons, nodes, units) in layer $i$. The default number of layers is 4 (hence $L = 4$), and by default $n_1 = 32$, $n_2 = 32$, $n_3 = 32$. The output layer always has 10 perceptrons (hence $n_L = 10$), since MNIST is a classification task with 10 categories (digits 0-9).
 
-The weights and biases are initialized using He initialization. Between each layer, the non-linear activation function ReLU is applied to the output perceptrons. In the output layer (layer $L$), softmax is applied to convert logits into class probabilities for classification. The output is therefore a probability distribution over over the 10 MNIST categories.
+The weights and biases are initialized using He initialization. Between each layer, the non-linear activation function ReLU is applied to the output perceptrons. In the output layer (layer $L$), softmax is applied to convert logits into class probabilities for classification. The output is therefore a probability distribution over the 10 MNIST categories.
 
 #### Training
 
@@ -42,7 +42,7 @@ The procedures mentioned above are called by default within the file `training.s
 
 Testing the model is rather simple:
 1. The entire MNIST training set is loaded into memory.
-2. Inference is ran over each sample, and the model output is compared to the ground truth label.
+2. Inference is run over each sample, and the model output is compared to the ground truth label.
 3. The results are aggregated to compute the model accuracy.
 
 ### Setup and Usage
@@ -66,6 +66,11 @@ gunzip MNIST/*.gz
 ```
 
 #### Usage
+First, clone this repository, then enter the new directory:
+```sh 
+git clone https://github.com/jdafoe12/DNN-I.git
+cd DNN-I
+```
 
 To train the model, run
 ```sh 
