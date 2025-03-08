@@ -2,11 +2,11 @@
 
 ### About
 
-DNN-I was developed both for learning and teaching purposes. Most importantly, my aim was to build a *concrete* understanding of how deep neural networks are trained and how inference works. To achieve this, I implemented everything from scratch, using no special libraries. This gave me much freedom in language choice. I chose Guile Scheme for a couple reasons:
+DNN-I was developed both for learning and teaching purposes. Most importantly, my aim was to build a *concrete* understanding of how deep neural networks are trained and how inference works. To achieve this, I implemented everything from scratch, using no special libraries. This gave me much freedom in language choice. I chose Guile Scheme for a couple of reasons:
 1. I thought it would be a good opportunity to be my first project written in Guile Scheme. I am (slowly) working my way through *Structure and Interpretation of Computer Programs (SICP)* and wanted to apply some of the learned principles.
 2. Given the history of lisp as a language for artificial intelligence applications, I thought it was a rather natural choice.
 
-For my first DNN, I chose to work with the MNIST dataset, inspired largely by the [3Blue1Brown's neural network video series](https://www.3blue1brown.com/topics/neural-networks). My initial target was to achieve 97% or higher accuracy, and have achieved ---.
+For my first DNN, I chose to work with the MNIST dataset, inspired largely by the [3Blue1Brown's neural network video series](https://www.3blue1brown.com/topics/neural-networks). MNIST is a dataset consisting of 28x28 pixel grayscale handwritten digits. The task is for the DNN to to classify each image with the correct digit 0-9. My initial target was to achieve 97% or higher accuracy, and have achieved ---.
 
 In designing this code, I focused on enabling rapid experimentation with different hyperparameters, so they could be tweaked for optimal performance.
 
@@ -22,7 +22,7 @@ This is a standard fully connected deep neural network (DNN), which can be custo
 ```
 where $n_i$ is the number of perceptrons (aka neurons, nodes, units) in layer $i$. The default number of layers is 4 (hence $L = 4$), and by default $n_1 = 32$, $n_2 = 32$, $n_3 = 32$. The output layer always has 10 perceptrons (hence $n_L = 10$), since MNIST is a classification task with 10 categories (digits 0-9).
 
-The weights and biases are initialized using He initialization. Between each layer, the non-linear activation function ReLU is applied to the output perceptrons. In the output layer (layer $L$), Softmax is applied to convert logits into class probabilities for classification. The output is therefore a probability distribution over over the 10 MNIST categories.
+The weights and biases are initialized using He initialization. Between each layer, the non-linear activation function ReLU is applied to the output perceptrons. In the output layer (layer $L$), softmax is applied to convert logits into class probabilities for classification. The output is therefore a probability distribution over over the 10 MNIST categories.
 
 #### Training
 
@@ -43,14 +43,13 @@ The procedures mentioned above are called by default within the file `training.s
 Testing the model is rather simple:
 1. The entire MNIST training set is loaded into memory.
 2. Inference is ran over each sample, and the model output is compared to the ground truth label.
-3. The results are agregated to compute the model accuracy.
+3. The results are aggregated to compute the model accuracy.
 
 ### Setup and Usage
 
 #### Installing Guile
 
 ##### Ubuntu/Debian
-Run
 ```sh 
 apt-get install guile-3.0
 ```
