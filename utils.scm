@@ -41,9 +41,9 @@
 
 (define (load-mnist phase)
   (set! images-port
-        (open-input-file (if (= phase training-phase) "train-images-idx3-ubyte" "t10k-images-idx3-ubyte") #:binary #t))
+        (open-input-file (if (= phase training-phase) "MNIST/train-images-idx3-ubyte" "MNIST/t10k-images-idx3-ubyte") #:binary #t))
   (set! labels-port
-        (open-input-file (if (= phase training-phase) "train-labels-idx1-ubyte" "t10k-labels-idx1-ubyte") #:binary #t))
+        (open-input-file (if (= phase training-phase) "MNIST/train-labels-idx1-ubyte" "MNIST/t10k-labels-idx1-ubyte") #:binary #t))
   (set! images-magic (read-u32 images-port))
   (set! num-images (read-u32 images-port))
   (set! num-rows (read-u32 images-port))
