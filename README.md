@@ -14,11 +14,11 @@ In designing this code, I focused on enabling rapid experimentation with differe
 
 #### The Model
 This is a standard fully connected deep neural network (DNN), which can be customized to have $L$ layers. The entire model is initialized with random parameters (weights and biases) as follows:
-```math
-(define layers (list (initialize-layer 784 $n_1$)
-					 (initialize-layer $n_1$ $n_2$)
-                     $\vdots$
-					 (initialize-layer $n_{L-1}$ $n_L$)))
+```scheme
+(define layers (list (initialize-layer 784 n1)
+					 (initialize-layer n1 n2)
+                     ⋮
+					 (initialize-layer n_{L-1} nL)))
 ```
 where $n_i$ is the number of perceptrons (aka neurons, nodes, units) in layer $i$. The default number of layers is 4 (hence $L = 4$), and by default $n_1 = 32$, $n_2 = 32$, $n_3 = 32$. The output layer always has 10 perceptrons (hence $n_L = 10$), since MNIST is a classification task with 10 categories (digits 0-9).
 
