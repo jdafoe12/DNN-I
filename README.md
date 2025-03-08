@@ -2,9 +2,9 @@
 
 ### About
 
-DNN-I was developed both for learning and teaching purposes. Most importantly, my aim was to build a *concrete* understanding, of how deep neural networks are trained and how inference works. To achieve this, I implemented everything from scratch, using no special libraries. This gave me much freedom in language choice. I chose Guile Scheme for a couple reasons:
-- I thought it would be a good opportunity to be my first project written in Guile Scheme. I am (slowly) working my way through *Structure and Interpretation of Computer Programs (SICP)* and wanted to apply some of the learned principles.
-- Given the history of lisp as a language for artificial intelligence applications, I thought it was a rather natural choice.
+DNN-I was developed both for learning and teaching purposes. Most importantly, my aim was to build a *concrete* understanding of how deep neural networks are trained and how inference works. To achieve this, I implemented everything from scratch, using no special libraries. This gave me much freedom in language choice. I chose Guile Scheme for a couple reasons:
+1. I thought it would be a good opportunity to be my first project written in Guile Scheme. I am (slowly) working my way through *Structure and Interpretation of Computer Programs (SICP)* and wanted to apply some of the learned principles.
+2. Given the history of lisp as a language for artificial intelligence applications, I thought it was a rather natural choice.
 
 For my first DNN, I chose to work with the MNIST dataset, inspired largely by the [3Blue1Brown's neural network video series](https://www.3blue1brown.com/topics/neural-networks). My initial target was to achieve 97% or higher accuracy, and have achieved ---.
 
@@ -13,14 +13,12 @@ In designing this code, I focused on enabling rapid experimentation with differe
 ### Documentation
 
 #### The Model
-This is a standard fully connected deep neural network (DNN), which can be customized to have L layers. The entire model is initialized with random parameters (weights and biases) as follows:
+This is a standard fully connected deep neural network (DNN), which can be customized to have $L$ layers. The entire model is initialized with random parameters (weights and biases) as follows:
 ```scheme
-(define layers (list (initialize-layer 784 n_1)
-					 (initialize-layer n_1 n_2)
-					 .
-                     .
-                     .
-					 (initialize-layer n_{L-1} n_L)))
+(define layers (list (initialize-layer 784 $n_1$)
+					 (initialize-layer $n_1$ $n_2$)
+                     $\vdots$
+					 (initialize-layer $n_{L-1}$ $n_L$)))
 ```
 where $n_i$ is the number of perceptrons (aka neurons, nodes, units) in layer $i$. The default number of layers is 4 (hence $L = 4$), and by default $n_1 = 32$, $n_2 = 32$, $n_3 = 32$. The output layer always has 10 perceptrons (hence $n_L = 10$), since MNIST is a classification task with 10 categories (digits 0-9).
 
