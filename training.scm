@@ -137,7 +137,5 @@
 					 (initialize-layer 32 32)
 					 (initialize-layer 32 10)))
 
-(save-model (train-mnist layers 4 60000 0.009) "trained-model")
-
-(save-model (train-mnist layers 24 10000 0.009) "trained-model1")
+(save-model (train-mnist layers 8 60000 0.01) "trained-model")
 ;; DONE SPECIFIC TRAINING.

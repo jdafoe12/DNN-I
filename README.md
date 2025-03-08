@@ -6,7 +6,7 @@ DNN-I was developed both for learning and teaching purposes. Most importantly, m
 1. I thought it would be a good opportunity to be my first project written in Guile Scheme. I am (slowly) working my way through *Structure and Interpretation of Computer Programs (SICP)* and wanted to apply some of the learned principles.
 2. Given the history of lisp as a language for artificial intelligence applications, I thought it was a rather natural choice.
 
-For my first DNN, I chose to work with the MNIST dataset, inspired largely by the [3Blue1Brown's neural network video series](https://www.3blue1brown.com/topics/neural-networks). MNIST is a dataset consisting of 28x28 pixel grayscale handwritten digits. The task is for the DNN to to classify each image with the correct digit 0-9. My initial target was to achieve 97% or higher accuracy, and have achieved ---.
+For my first DNN, I chose to work with the MNIST dataset, inspired largely by the [3Blue1Brown's neural network video series](https://www.3blue1brown.com/topics/neural-networks). MNIST is a dataset consisting of 28x28 pixel grayscale handwritten digits. The task is for the DNN to to classify each image with the correct digit 0-9. My initial target was to achieve 97% or higher accuracy, and have so far achieved 96.62% accuracy.
 
 In designing this code, I focused on enabling rapid experimentation with different hyperparameters, so they could be tweaked for optimal performance.
 
