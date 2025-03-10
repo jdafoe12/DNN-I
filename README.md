@@ -59,6 +59,11 @@ pacman -S guile
 ```
 
 #### Extracting MNIST dataset
+First, clone this repository, then enter the new directory:
+```sh 
+git clone https://github.com/jdafoe12/DNN-I.git
+cd DNN-I
+```
 
 The MNIST dataset is included in this repository under the MNIST folder in compressed format. To extract these files, run 
 ```sh
@@ -66,11 +71,6 @@ gunzip MNIST/*.gz
 ```
 
 #### Usage
-First, clone this repository, then enter the new directory:
-```sh 
-git clone https://github.com/jdafoe12/DNN-I.git
-cd DNN-I
-```
 
 To train the model, run
 ```sh 
