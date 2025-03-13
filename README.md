@@ -10,6 +10,8 @@ For my first DNN, I chose to work with the MNIST dataset, inspired largely by th
 
 In designing this code, I focused on enabling rapid experimentation with different hyperparameters, so they could be tweaked for optimal performance.
 
+---
+
 ### Documentation
 
 #### The Model
@@ -44,6 +46,8 @@ Testing the model is rather simple:
 1. The entire MNIST training set is loaded into memory.
 2. Inference is run over each sample, and the model output is compared to the ground truth label.
 3. The results are aggregated to compute the model accuracy.
+
+---
 
 ### Setup and Usage
 
